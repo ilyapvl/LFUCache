@@ -48,7 +48,7 @@ double testLFUCache(int cache_size, const std::vector<int>& requests)
 
 double testOptimalCache(int cache_size, const std::vector<int>& requests) 
 {
-    OptimalCache optimal(cache_size);
+    OptimalCache<int> optimal(cache_size);
     optimal.preprocessRequests(requests);
     size_t hits = optimal.simulate(requests);
     return static_cast<double>(hits) / requests.size();
