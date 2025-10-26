@@ -3,6 +3,7 @@
 
 #include "LFUCache.h"
 
+
 template<typename K, typename V>
 void LFUCache<K, V>::increase_freq(NodeIter it)
 {
@@ -26,7 +27,7 @@ void LFUCache<K, V>::increase_freq(NodeIter it)
 }
 
 template<typename K, typename V>
-LFUCache<K, V>::LFUCache(int capacity) : capacity_(capacity), min_freq_(0)
+LFUCache<K, V>::LFUCache(int capacity, FuncType slow_get_page) : capacity_(capacity), min_freq_(0), slow_get_page_(std::move(slow_get_page))
 {
     if (capacity_ <= 0)
     {
@@ -47,14 +48,14 @@ V& LFUCache<K, V>::get(const K& key)
 }
 
 template<typename K, typename V>
-void LFUCache<K, V>::put(const K& key, const V& value)
+void LFUCache<K, V>::put(const K& key)
 {
     if (capacity_ == 0) return;
 
     auto it = key_map_.find(key);
     if (it != key_map_.end())
     {
-        it->second->value = value;
+        it->second->value = slow_get_page_(key);
         increase_freq(it->second);
         return;
     }
@@ -65,7 +66,7 @@ void LFUCache<K, V>::put(const K& key, const V& value)
     }
 
     min_freq_ = 1;
-    freq_map_[1].push_front(Node(key, value, 1));
+    freq_map_[1].push_front(Node(key, slow_get_page_(key), 1));
     key_map_[key] = freq_map_[1].begin();
 }
 

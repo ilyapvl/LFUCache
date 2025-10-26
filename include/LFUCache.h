@@ -4,6 +4,9 @@
 #include <unordered_map>
 #include <list>
 
+#include "global.h"
+
+
 template<typename K, typename V>
 class LFUCache 
 {
@@ -17,20 +20,21 @@ private:
     };
 
     using NodeIter = typename std::list<Node>::iterator;
-
+    using FuncType = std::function<V(K)>;
     
 
     int capacity_;
     int min_freq_;
+    FuncType slow_get_page_;
     std::unordered_map<int, std::list<Node>> freq_map_;
     std::unordered_map<K, NodeIter> key_map_;
 
     void increase_freq(NodeIter it);
 
 public:
-    LFUCache(int capacity);
+    LFUCache(int capacity, FuncType slow_get_page);
     V& get(const K& key);
-    void put(const K& key, const V& value);
+    void put(const K& key);
     void evict();
     size_t size() const;
     bool empty() const;

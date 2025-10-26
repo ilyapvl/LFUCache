@@ -2,23 +2,23 @@
 #define OPTIMALCACHE_H
 
 #include <unordered_map>
-#include <queue>
-#include <vector>
 #include <unordered_set>
+#include <vector>
+#include <queue>
+#include <functional>
 
-template<typename T>
-class OptimalCache
+class OptimalCache 
 {
 private:
     size_t cache_size;
-    std::unordered_map<T, std::queue<size_t>> future_indices;
+    std::function<int(int)> slow_get_page_;
+    std::unordered_map<int, std::queue<size_t>> future_indices;
+    std::unordered_map<int, int> cache_values; // Store actual values
 
 public:
-    OptimalCache(size_t size);
-    void preprocessRequests(const std::vector<T>& requests);
-    size_t simulate(const std::vector<T>& requests);
+    OptimalCache(size_t size, std::function<int(int)> slow_get_page);
+    void preprocessRequests(const std::vector<int>& requests);
+    size_t simulate(const std::vector<int>& requests);
 };
-
-#include "OptimalCache.tpp"
 
 #endif // OPTIMALCACHE_H
