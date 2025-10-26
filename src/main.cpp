@@ -87,15 +87,15 @@ double testOptimalCache(int cache_size, const std::vector<int>& requests)
 void printHelp()
 {
     std::cout << "Usage:\n";
-    std::cout << "  --mode=lfu              : Run only LFU cache simulation\n";
-    std::cout << "  --mode=optimal          : Run only Optimal cache simulation\n";
-    std::cout << "  --mode=compare          : Compare both cache algorithms (default)\n";
-    std::cout << "  --requests=<number>     : Number of requests to generate\n";
-    std::cout << "  --pages=<number>        : Number of unique pages\n";
-    std::cout << "  --cache-size=<number>   : Cache size\n";
-    std::cout << "  --request-type=random   : Generate random requests (default)\n";
+    std::cout << "  --mode=lfu                : Run only LFU cache simulation\n";
+    std::cout << "  --mode=optimal            : Run only Optimal cache simulation\n";
+    std::cout << "  --mode=compare            : Compare both cache algorithms (default)\n";
+    std::cout << "  --requests=<number>       : Number of requests to generate\n";
+    std::cout << "  --pages=<number>          : Number of unique pages\n";
+    std::cout << "  --cache-size=<number>     : Cache size\n";
+    std::cout << "  --request-type=random     : Generate random requests (default)\n";
     std::cout << "  --request-type=sequential : Generate sequential patterns\n";
-    std::cout << "  --help                  : Show this help message\n\n";
+    std::cout << "  --help                    : Show this help message\n\n";
 }
 
 int main(int argc, char* argv[])
