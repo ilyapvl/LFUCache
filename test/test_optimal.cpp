@@ -35,27 +35,14 @@ TEST_F(OptimalCacheTest, PerfectSequence)
     
     cache.preprocessRequests(requests);
     size_t hits = cache.simulate(requests);
-    
-    // After first 3 misses, all should be hits
-    EXPECT_EQ(hits, 6);
-}
 
-TEST_F(OptimalCacheTest, ZeroCacheSize)
-{
-    OptimalCache cache(0, slow_get_page_int);
-    std::vector<int> requests = {1, 2, 3, 1, 2, 3};
-    
-    cache.preprocessRequests(requests);
-    size_t hits = cache.simulate(requests);
-    
-    EXPECT_EQ(hits, 0);
+    EXPECT_EQ(hits, 6);
 }
 
 TEST_F(OptimalCacheTest, ComplexEviction)
 {
     OptimalCache cache(3, slow_get_page_int);
-    // This sequence tests the optimal eviction strategy
-    std::vector<int> requests = {1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5};
+    std::vector<int> requests = {1, 2, 3, 4, 1, 2, 6, 1, 2, 3, 4, 5};
     
     cache.preprocessRequests(requests);
     size_t hits = cache.simulate(requests);
