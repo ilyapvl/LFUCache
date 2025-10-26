@@ -10,12 +10,10 @@ class OptimalCacheTest : public Test
 protected:
     void SetUp() override
     {
-        // Common setup for all tests
     }
     
     void TearDown() override
     {
-        // Clean up after each test
     }
 };
 
