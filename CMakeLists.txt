@@ -4,13 +4,17 @@ project(CacheSimulator)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include_directories(
+    include
+    include/exceptions
+)
+
 add_executable(main
     src/main.cpp
     src/OptimalCache.cpp
 )
 
 target_include_directories(main PRIVATE src)
-include_directories(include)
 
 find_package(GTest REQUIRED)
 enable_testing()
