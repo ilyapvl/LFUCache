@@ -1,82 +1,128 @@
+/**
+ * @file LFUCache.h
+ * @brief Заголовочный файл для LFU кэша
+ */
+
 #ifndef LFUCACHE_H
 #define LFUCACHE_H
 
 #include <unordered_map>
 #include <list>
+#include <stdexcept>
+#include <iostream>
 
 #include "global.h"
+#include "exceptions/InvalidArgumentException.h"
+#include "exceptions/CacheOperationException.h"
 
-
+/**
+ * @brief LFU кэш
+ * 
+ * @tparam K Тип ключа
+ * @tparam V Тип значения
+ */
 template<typename K, typename V>
-class LFUCache 
+class LFUCache
 {
 private:
-    struct Node 
+    /**
+     * @brief Структура узла кэша
+     */
+    struct Node
     {
-        K key;
-        V value;
-        int freq;
-        Node(const K& k, const V& v, int f) : key(k), value(v), freq(f) {}
+        K key;      
+        V value;    
+        int frequency;  
+        
+        /**
+         * @brief Конструктор узла
+         * @param k Ключ
+         * @param v Значение
+         * @param f Начальная частота
+         */
+        Node(const K& k, const V& v, int f) : key(k), value(v), frequency(f)
+        {}
     };
-
-    using NodeIter = typename std::list<Node>::iterator;
-    using FuncType = std::function<V(K)>;
     
+    using NodeIterator = typename std::list<Node>::iterator;
+    using SlowGetFunc = std::function<V(K)>;
+    
+    size_t capacity_;          
+    int min_frequency_;        
+    SlowGetFunc slow_get_func_;
+    
+    /**
+     * @brief Карта частот т. е. список элементов с данной частотой
+     */
+    std::unordered_map<int, std::list<Node>> frequency_map_;
+    
+    /**
+     * @brief Карта ключей - список итераторов на элементы
+     */
+    std::unordered_map<K, NodeIterator> key_map_;
 
-    int capacity_;
-    int min_freq_;
-    FuncType slow_get_page_;
-    std::unordered_map<int, std::list<Node>> freq_map_;
-    std::unordered_map<K, NodeIter> key_map_;
-
-    void increase_freq(NodeIter it);
+    /**
+     * @brief Увеличивает частоту использования элемента
+     * @param it Итератор на элемент в списке
+     * 
+     * @throws CacheOperationException если элемент не найден
+     */
+    void increase_frequency(NodeIterator it);
 
 public:
-    LFUCache(int capacity, FuncType slow_get_page);
+    /**
+     * @brief Конструктор кэша
+     * @param capacity Вместимость кэша >0
+     * @param slow_get_func Функция для медленного получения значения
+     * 
+     * @throws InvalidArgumentException если capacity <= 0
+     */
+    LFUCache(size_t capacity, SlowGetFunc slow_get_func);
+    
+    /**
+     * @brief Получить значение по ключу
+     * @param key Ключ
+     * @return Ссылка на значение
+     * 
+     * @throws std::out_of_range если ключ не найден
+     * @throws CacheOperationException если ошибка операции
+     */
     V& get(const K& key);
+    
+    /**
+     * @brief Поместить значение в кэш
+     * @param key Ключ
+     */
     void put(const K& key);
+    
+    /**
+     * @brief Вытеснить один элемент из кэша
+     * @throws CacheOperationException если кэш пуст
+     */
     void evict();
+    
+    /**
+     * @brief Получить текущий размер
+     * @return Количество элементов
+     */
     size_t size() const;
+    
+    /**
+     * @brief Проверить, пуст ли кэш
+     * @return true если кэш пуст иначе false
+     */
     bool empty() const;
-    int capacity() const;
+    
+    /**
+     * @brief Получить вместимость кэша
+     * @return Макс количество элементов
+     */
+    size_t capacity() const;
+    
+    /**
+     * @brief Очистить кэш
+     */
     void clear();
-
-    friend std::ostream& operator<<(std::ostream& os, const LFUCache& cache)
-    {
-        os << "=== Cache state ===" << std::endl;
-        os << "Capacity: " << cache.capacity_ << std::endl;
-        os << "Size: " << cache.size() << std::endl;
-        os << "Min frequency: " << cache.min_freq_ << std::endl;
-    
-        if (cache.empty())
-        {
-            os << "Cache is empty" << std::endl;
-        }
-    
-        else
-        {
-            std::vector<int> frequencies;
-            for (const auto& pair : cache.freq_map_)
-            {
-                frequencies.push_back(pair.first);
-            }
-            std::sort(frequencies.begin(), frequencies.end());
-        
-            for (int freq : frequencies)
-            {
-                const auto& node_list = cache.freq_map_.at(freq);
-                os << "Freq " << freq << " (" << node_list.size() << "): ";
-            
-                for (const auto& node : node_list)
-                {
-                    os << "[" << node.key << "]->" << node.value << " ";
-                }
-                os << std::endl;
-            }
-        }
-        os << "=================" << std::endl;
-        return os;
-    }
 };
 
 #include "LFUCache.tpp"
