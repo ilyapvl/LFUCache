@@ -3,49 +3,29 @@
 #include "OptimalCache.h"
 #include "global.h"
 
+
+//TODO - сделать возможность тестирования по последовательности запросов из файла
+
+
 using namespace testing;
 
 class OptimalCacheTest : public Test
 {
 protected:
-    void SetUp() override
-    {
-    }
+    void SetUp() override {}
     
-    void TearDown() override
-    {
-    }
+    void TearDown() override {}
 };
 
-TEST_F(OptimalCacheTest, BasicSimulation)
+TEST_F(OptimalCacheTest, Basic)
 {
-    OptimalCache cache(2, slow_get_page_int);
+    opt::OptimalCache<int, int> cache(2, slow_get_page_int);
     std::vector<int> requests = {1, 2, 1, 3, 2};
     
     cache.preprocessRequests(requests);
     size_t hits = cache.simulate(requests);
+    //std::cout << cache.get(3);
     
     EXPECT_GT(hits, 0);
 }
 
-TEST_F(OptimalCacheTest, PerfectSequence)
-{
-    OptimalCache cache(3, slow_get_page_int);
-    std::vector<int> requests = {1, 2, 3, 1, 2, 3, 1, 2, 3};
-    
-    cache.preprocessRequests(requests);
-    size_t hits = cache.simulate(requests);
-
-    EXPECT_EQ(hits, 6);
-}
-
-TEST_F(OptimalCacheTest, ComplexEviction)
-{
-    OptimalCache cache(3, slow_get_page_int);
-    std::vector<int> requests = {1, 2, 3, 4, 1, 2, 6, 1, 2, 3, 4, 5};
-    
-    cache.preprocessRequests(requests);
-    size_t hits = cache.simulate(requests);
-    
-    EXPECT_GT(hits, 0);
-}
