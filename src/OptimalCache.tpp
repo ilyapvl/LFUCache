@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 template<typename K, typename V>
-OptimalCache<K, V>::OptimalCache(size_t capacity, std::function<V(K)> slow_get_func) 
+opt::OptimalCache<K, V>::OptimalCache(size_t capacity, std::function<V(K)> slow_get_func) 
     : capacity_(capacity), 
       slow_get_func_(std::move(slow_get_func)),
       hit_count_(0),
@@ -20,12 +20,12 @@ OptimalCache<K, V>::OptimalCache(size_t capacity, std::function<V(K)> slow_get_f
 {
     if (capacity_ == 0)
     {
-        throw InvalidArgumentException("Cache capacity must be greater than 0");
+        throw std::invalid_argument("Cache capacity must be greater than 0");
     }
 }
 
 template<typename K, typename V>
-void OptimalCache<K, V>::preprocessRequests(const std::vector<K>& requests)
+void opt::OptimalCache<K, V>::preprocessRequests(const std::vector<K>& requests)
 {
     future_indices_.clear();
     clear();
@@ -46,7 +46,8 @@ void OptimalCache<K, V>::preprocessRequests(const std::vector<K>& requests)
     }
 }
 
-template<typename K, typename V> size_t OptimalCache<K, V>::getNextUse(const K& key) const
+template<typename K, typename V>
+size_t opt::OptimalCache<K, V>::getNextUse(const K& key) const
 {
     auto it = future_indices_.find(key);
     if (it == future_indices_.end() || it->second.empty())
@@ -57,7 +58,7 @@ template<typename K, typename V> size_t OptimalCache<K, V>::getNextUse(const K& 
 }
 
 template<typename K, typename V>
-K OptimalCache<K, V>::findEvictionKey()
+K opt::OptimalCache<K, V>::findEvictionKey()
 {
     if (current_cache_.empty())
     {
@@ -96,7 +97,7 @@ K OptimalCache<K, V>::findEvictionKey()
 }
 
 template<typename K, typename V>
-bool OptimalCache<K, V>::step(const K& key)
+bool opt::OptimalCache<K, V>::step(const K& key)
 {
     if (future_indices_.empty())
     {
@@ -122,8 +123,7 @@ bool OptimalCache<K, V>::step(const K& key)
     
     miss_count_++;
     
-
-
+    V value = slow_get_func_(key);
 
     if (current_cache_.size() >= capacity_)
     {
@@ -143,17 +143,17 @@ bool OptimalCache<K, V>::step(const K& key)
     }
     
     current_cache_.insert(key);
-    cache_values_[key] = slow_get_func_(key);
+    cache_values_[key] = std::move(value);
     
     return false;
 }
 
 template<typename K, typename V>
-size_t OptimalCache<K, V>::simulate(const std::vector<K>& requests)
+size_t opt::OptimalCache<K, V>::simulate(const std::vector<K>& requests)
 {
     if (future_indices_.empty())
     {
-        throw CacheOperationException("preprocessRequests() must be called before simulate");
+        throw CacheOperationException("preprocessRequests must be called before simulate");
     }
     
     clear();
@@ -190,7 +190,7 @@ size_t OptimalCache<K, V>::simulate(const std::vector<K>& requests)
 }
 
 template<typename K, typename V>
-std::vector<std::pair<K, V>> OptimalCache<K, V>::getCacheContents() const
+std::vector<std::pair<K, V>> opt::OptimalCache<K, V>::getCacheContents() const
 {
     std::vector<std::pair<K, V>> contents;
     contents.reserve(current_cache_.size());
@@ -208,7 +208,7 @@ std::vector<std::pair<K, V>> OptimalCache<K, V>::getCacheContents() const
 }
 
 template<typename K, typename V>
-V OptimalCache<K, V>::getValue(const K& key) const
+V opt::OptimalCache<K, V>::get(const K& key) const
 {
     auto it = cache_values_.find(key);
     if (it == cache_values_.end())
@@ -219,17 +219,14 @@ V OptimalCache<K, V>::getValue(const K& key) const
 }
 
 template<typename K, typename V>
-double OptimalCache<K, V>::getHitRate() const
+double opt::OptimalCache<K, V>::getHitRate() const
 {
     size_t total = hit_count_ + miss_count_;
     if (total == 0) return 0.0;
-
-    
     return static_cast<double>(hit_count_) / total;
 }
 
-template<typename K, typename V>
-void OptimalCache<K, V>::clear()
+template<typename K, typename V> void opt::OptimalCache<K, V>::clear()
 {
     current_cache_.clear();
     cache_values_.clear();
