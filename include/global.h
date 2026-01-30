@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory.h>
 
 /**
  * @brief Структура, представляющая страницу в кэше
@@ -16,13 +17,30 @@ struct Page
 {
     int index;     
     int size;     
-    char* data;    
+    std::unique_ptr<char[]> data;   
     
-    Page(int idx, int sz) : index(idx), size(sz), data(new char[sz]) {}
+    Page(int idx, int sz) : index(idx), size(sz), data(std::make_unique<char[]>(sz)) {}
     
-    ~Page()
+    ~Page() noexcept = default;
+    
+    Page(const Page&) = delete;
+    Page& operator=(const Page&) = delete;
+    
+    Page(Page&& other) : index(other.index), size(other.size), data(std::move(other.data)) 
     {
-        delete[] data;
+        other.size = 0;
+    }
+    
+    Page& operator=(Page&& other)
+    {
+        if (this != &other)
+        {
+            index = other.index;
+            size = other.size;
+            data = std::move(other.data);
+            other.size = 0;
+        }
+        return *this;
     }
 };
 
@@ -30,7 +48,7 @@ struct Page
  * @brief Функция медлнного получения страницы
 
  * @param index Индекс запрашиваемой страницы
- * @return Значение страницы (здесь в качестве значения используется просто ее индекс)
+ * @return Значение страницы (здесь в качестве значения используется просто индекс)
  */
 inline int slow_get_page_int(int index)
 {
@@ -43,12 +61,12 @@ inline int slow_get_page_int(int index)
 using SlowGetPageFunc = std::function<int(int)>;
 
 /**
- * @brief Тип последовательности запросов
+ * @brief Тип для последовательности запросов
  */
 using RequestSequence = std::vector<int>;
 
 /**
- * @brief Структура для хранения результатов бенчмаркинга
+ * @brief Тип для хранения результатов бенчмаркинга
  */
 struct BenchmarkResult
 {
