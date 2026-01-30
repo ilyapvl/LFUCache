@@ -11,7 +11,6 @@ include_directories(
 
 add_executable(main
     src/main.cpp
-    src/OptimalCache.cpp
 )
 
 target_include_directories(main PRIVATE src)
@@ -21,11 +20,9 @@ enable_testing()
 
 add_executable(test_lfu 
     test/test_lfu.cpp 
-    src/OptimalCache.cpp
 )
 add_executable(test_optimal 
     test/test_optimal.cpp 
-    src/OptimalCache.cpp
 )
 
 target_link_libraries(test_lfu GTest::gtest GTest::gtest_main)
